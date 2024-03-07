@@ -9,7 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
+import PropTypes from 'prop-types';
 
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
@@ -26,7 +26,9 @@ import { useEffect } from 'react';
 
 // ----------------------------------------------------------------------
 
-export default function EmployeePage() {
+export default function EmployeePage({
+  handleOpen
+}) {
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -127,8 +129,8 @@ export default function EmployeePage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Employees</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          New Employee
+        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleOpen}>
+          Add Employees
         </Button>
       </Stack>
 
@@ -204,4 +206,8 @@ export default function EmployeePage() {
       </Card>
     </Container>
   );
+}
+
+EmployeePage.propType = {
+  handleOpen : PropTypes.func
 }
