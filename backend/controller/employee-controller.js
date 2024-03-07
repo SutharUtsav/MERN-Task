@@ -2,8 +2,234 @@ const express = require('express');
 const router = express.Router();
 const { prisma } = require('../config/prismaClient');
 const { ApiResponseStatus, ApiResponseMesage } = require('../const/enum-api-response');
-const { validateEmployee, validateEmployeeCustomInfo } = require('../helper/validation');
+const { validateEmployee, validateEmployeeCustomInfo, validateEmployeeFromExcelSheet } = require('../helper/validation');
 const { upload } = require('../config/multer');
+
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const exceljs = require('exceljs');
+
+const { RemoveFile } = require('../helper/file-handling');
+
+//#region special operations on Employee
+
+// Multer setup for excel sheet upload
+const excelSheetStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const outputDir = `Employee/Data`;
+
+        // Ensure the output directory exists
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        cb(null, outputDir)
+    },
+    filename: (req, file, cb) => {
+        const date = new Date();
+        cb(null, `Employee-${date.getDate()}${date.getMonth()}${date.getFullYear()}-${date.getTime()}${path.extname(file.originalname)}`)
+    }
+});
+const uploadExcelSheet = multer({
+    storage: excelSheetStorage,
+    limits: { fileSize: "10000000" }, //10 MB
+    fileFilter: (req, file, cb) => {
+        const fileTypes = /excel|xls|xlsx|sheet/
+        const mimeType = fileTypes.test(file.mimetype)
+        const extname = fileTypes.test(path.extname(file.originalname))
+
+        if (mimeType && extname) {
+            return cb(null, true)
+        }
+        cb('Give proper file format to upload')
+    }
+}).single('excelSheet');
+
+router.post('/upload-data', uploadExcelSheet, async (req, res) => {
+    // try {
+
+    //     const filePath = req.file.path;
+
+    //     const data = await fs.readFile(filePath, 'utf8', async (err, data) => {
+    //         if (err) {
+    //             console.error('Error reading file:', err);
+    //             return;
+    //         }
+
+    //         // Split the content into rows
+    //         const rows = data.split('\n');
+
+    //         let employees = [];
+
+    //         let error = [];
+
+
+    //         // Process each row
+    //         await Promise.all(rows.forEach((row,) => {
+    //             // Split the row into columns
+
+    //             console.log(row)
+
+    //             const columns = row.split('\t');
+
+    //             let employeeDto = validateEmployeeFromExcelSheet(columns);
+
+    //             if (!employeeDto) {
+
+    //                 error.push({
+    //                     status: false,
+    //                     message: ApiResponseMesage.API_SOMETHING_WENT_WRONG,
+    //                     payload: null
+    //                 });
+    //             }
+    //             else if (!employeeDto.status) {
+
+    //                 error.push({
+    //                     status: false,
+    //                     message: employeeDto.message,
+    //                     payload: null
+    //                 })
+    //             }
+    //             else {
+    //                 employees.push(employeeDto);
+    //             }
+    //         }));
+
+    //         if (error.length > 0) {
+    //             res.status(ApiResponseStatus.API_SUCCESS).json({
+    //                 status: false,
+    //                 payload: error,
+    //                 message: ApiResponseMesage.API_SOMETHING_WENT_WRONG
+    //             })
+    //         }
+    //         else {
+
+    //             await prisma.$transaction(
+    //                 employees.map((employee) =>
+    //                     prisma.employee.create({
+    //                         data: {
+    //                             ...employee,
+    //                             customInfo: {
+    //                                 create: employee.customInfo,
+    //                             },
+    //                         },
+    //                         include: {
+    //                             customInfo: true,
+    //                         },
+    //                     })
+    //                 )
+    //             )
+
+    //             res.status(ApiResponseStatus.API_SUCCESS).json({
+    //                 status: true,
+    //                 payload: newEmployee,
+    //                 message: ApiResponseMesage.API_SUCCESS
+    //             })
+    //         }
+    //     });
+
+    // }
+    // catch (error) {
+    //     RemoveFile(req.file.path);
+    //     res.status(ApiResponseStatus.API_INTERNAL_SERVER_ERROR).json({
+    //         success: false,
+    //         payload: [],
+    //         message: error?.message,
+    //     })
+    // }
+
+
+    try {
+        const filePath = req.file.path;
+
+        const data = await new Promise((resolve, reject) => {
+            fs.readFile(filePath, 'utf8', (err, data) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
+
+        // Split the content into rows
+        const rows = data.split('\n');
+
+        let employees = [];
+        let errors = [];
+
+        // Process each row asynchronously
+        await Promise.all(
+            rows.map(async (row,index) => {
+                // Split the row into columns
+                if(index!=0){
+
+                    console.log(row);
+    
+                    const columns = row.split('\t');
+    
+                    const employeeDto = await validateEmployeeFromExcelSheet(columns);
+    
+                    if (!employeeDto) {
+                        errors.push({
+                            status: false,
+                            message: ApiResponseMesage.API_SOMETHING_WENT_WRONG,
+                            payload: null,
+                        });
+                    } else if (!employeeDto.status) {
+                        errors.push({
+                            status: false,
+                            message: employeeDto.message,
+                            payload: null,
+                        });
+                    } else {
+                        employees.push(employeeDto);
+                    }
+                }
+            })
+        );
+
+        if (errors.length > 0) {
+            RemoveFile(req.file.path)
+            res.status(ApiResponseStatus.API_SUCCESS).json({
+                status: false,
+                payload: errors,
+                message: ApiResponseMesage.API_SOMETHING_WENT_WRONG,
+            });
+        } else {
+            // Process the employees array asynchronously
+            console.log("before api call")
+            const newEmployees = await Promise.all(
+                employees.map(async (employee) =>
+                    prisma.employee.create({
+                        data: {
+                            ...employee,
+                            customInfo: {
+                                create: employee.customInfo,
+                            },
+                        },
+                        include: {
+                            customInfo: true,
+                        },
+                    })
+                )
+            );
+
+            res.status(ApiResponseStatus.API_SUCCESS).json({
+                status: true,
+                payload: newEmployees,
+                message: ApiResponseMesage.API_SUCCESS,
+            });
+        }
+    } catch (error) {
+        RemoveFile(req.file.path);
+        res.status(ApiResponseStatus.API_INTERNAL_SERVER_ERROR).json({
+            success: false,
+            payload: [],
+            message: error?.message,
+        });
+    }
+})
+
+//#endregion
 
 
 //#region CRUD specific operations on Employee 
