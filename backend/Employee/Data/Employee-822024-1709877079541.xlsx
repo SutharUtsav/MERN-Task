@@ -1,6 +1,0 @@
-Name	Salary	Status	Joining Date	BirthDate	Address	Skills	Mobile No	UAN No	City
-Utsav	2000	Active	06-03-2023	01-24-2002	"Bhuj, Kutch, Gujarat"	"C#, .NET, Javascript"	1234567898	qwqjhf23124jkh43	Bhuj
-Shubham	2000	Active	06-04-2023	01-24-2003	Surat	"C#, .NET, Typescript"	1234567899	qwqjhf23124jkh44	Surat
-Yash	3000	Active	06-05-2023	01-24-2004	Surat	"C#, .NET"	1234567900	qwqjhf23124jkh45	Surat
-Smit	4000	Active	06-06-2023	01-24-2005	Surat	"C#, .NET"	1234567901	qwqjhf23124jkh46	Surat
-Piyush	3000	Expired	06-07-2023	01-24-2006	Amreli	Neuron ESB	1234567902	qwqjhf23124jkh47	Amreli
