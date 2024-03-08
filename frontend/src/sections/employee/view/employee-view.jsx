@@ -9,7 +9,6 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-import PropTypes from 'prop-types';
 
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
@@ -21,14 +20,12 @@ import TableEmptyRows from '../table-empty-rows';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 import { get } from '../../../service/api-service'
-import { useApiCall } from '../../../hooks/use-api-call'
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 // ----------------------------------------------------------------------
 
-export default function EmployeePage({
-  handleOpen
-}) {
+export default function EmployeePage({openChartModal}) {
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -49,29 +46,29 @@ export default function EmployeePage({
     filterName,
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     get("/employee")
-    .then(result => { 
-      if(result.status){
+      .then(result => {
+        if (result.status) {
 
-        //  console.log(result)
-        setEmployees(result.data.payload)
+          //  console.log(result)
+          setEmployees(result.data.payload)
 
-        dataFiltered = applyFilter({
-          inputData : result.data.payload,
-          comparator: getComparator(order,orderBy),
-          filterName
-        })
+          dataFiltered = applyFilter({
+            inputData: result.data.payload,
+            comparator: getComparator(order, orderBy),
+            filterName
+          })
 
-        // console.log(dataFiltered)
-      }
-    })
-    .catch((error)=>{
-      console.log(error)
-    })
-  },[])
+          // console.log(dataFiltered)
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }, [])
 
-  
+
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -129,8 +126,12 @@ export default function EmployeePage({
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Employees</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleOpen}>
+        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />} href="employee/create">
           Add Employees
+        </Button>
+
+        <Button variant="contained" color="primary" startIcon={<Iconify icon="mage:chart-15" />} onClick={openChartModal}>
+          Generate Charts
         </Button>
       </Stack>
 
@@ -158,6 +159,7 @@ export default function EmployeePage({
                   { id: 'birthDate', label: 'BirthDate' },
                   { id: 'skills', label: 'Skills' },
                   { id: 'salary', label: 'Salary' },
+                  { id: 'city', label: "City" },
                   { id: 'address', label: 'Address' },
                   { id: 'mobileNo', label: 'Mobile No' },
                   { id: 'uanNo', label: 'UAN No' },
@@ -176,6 +178,7 @@ export default function EmployeePage({
                       birthDate={row.birthDate}
                       skills={row.skills}
                       salary={row.salary}
+                      city={row.customInfo.city}
                       address={row.address}
                       mobileNo={row.customInfo.mobileNo}
                       uanNo={row.customInfo.uanNo}
@@ -208,6 +211,6 @@ export default function EmployeePage({
   );
 }
 
-EmployeePage.propType = {
-  handleOpen : PropTypes.func
+EmployeePage.propType ={
+  openChartModal : PropTypes.func
 }

@@ -78,6 +78,8 @@ export const bulkInsert = async (endpoint, jsonData = null) => {
     formData.append(data.toString(), jsonData[data]);
   });
 
+  console.log("formData :" + formData);
+
   let config = {
     method: "post",
     maxBodyLength: Infinity,

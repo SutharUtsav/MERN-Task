@@ -25,6 +25,7 @@ export default function EmployeeTableRow({
   birthDate,
   skills,
   salary,
+  city,
   address,
   mobileNo,
   uanNo,
@@ -65,6 +66,8 @@ export default function EmployeeTableRow({
         <TableCell>{skills.join(', ')}</TableCell>
         
         <TableCell>{salary}</TableCell>
+
+        <TableCell>{city}</TableCell>
 
         <TableCell>{address}</TableCell>
 
