@@ -18,8 +18,10 @@ const initApp = async () => {
         app.use(bodyParser.urlencoded({ extended: true }));
 
         const employeeController = require('./controller/employee-controller')
+        const chartController = require('./controller/chart-controller')
 
         app.use(`${commonURL}/employee`, employeeController);
+        app.use(`${commonURL}/chart`, chartController);
         app.use((req, res, next) => {
             res.status(404);
             return res.json({

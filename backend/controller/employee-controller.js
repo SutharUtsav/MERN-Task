@@ -8,7 +8,6 @@ const { upload } = require('../config/multer');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const exceljs = require('exceljs');
 
 const { RemoveFile } = require('../helper/file-handling');
 
@@ -47,99 +46,6 @@ const uploadExcelSheet = multer({
 }).single('excelSheet');
 
 router.post('/upload-data', uploadExcelSheet, async (req, res) => {
-    // try {
-
-    //     const filePath = req.file.path;
-
-    //     const data = await fs.readFile(filePath, 'utf8', async (err, data) => {
-    //         if (err) {
-    //             console.error('Error reading file:', err);
-    //             return;
-    //         }
-
-    //         // Split the content into rows
-    //         const rows = data.split('\n');
-
-    //         let employees = [];
-
-    //         let error = [];
-
-
-    //         // Process each row
-    //         await Promise.all(rows.forEach((row,) => {
-    //             // Split the row into columns
-
-    //             console.log(row)
-
-    //             const columns = row.split('\t');
-
-    //             let employeeDto = validateEmployeeFromExcelSheet(columns);
-
-    //             if (!employeeDto) {
-
-    //                 error.push({
-    //                     status: false,
-    //                     message: ApiResponseMesage.API_SOMETHING_WENT_WRONG,
-    //                     payload: null
-    //                 });
-    //             }
-    //             else if (!employeeDto.status) {
-
-    //                 error.push({
-    //                     status: false,
-    //                     message: employeeDto.message,
-    //                     payload: null
-    //                 })
-    //             }
-    //             else {
-    //                 employees.push(employeeDto);
-    //             }
-    //         }));
-
-    //         if (error.length > 0) {
-    //             res.status(ApiResponseStatus.API_SUCCESS).json({
-    //                 status: false,
-    //                 payload: error,
-    //                 message: ApiResponseMesage.API_SOMETHING_WENT_WRONG
-    //             })
-    //         }
-    //         else {
-
-    //             await prisma.$transaction(
-    //                 employees.map((employee) =>
-    //                     prisma.employee.create({
-    //                         data: {
-    //                             ...employee,
-    //                             customInfo: {
-    //                                 create: employee.customInfo,
-    //                             },
-    //                         },
-    //                         include: {
-    //                             customInfo: true,
-    //                         },
-    //                     })
-    //                 )
-    //             )
-
-    //             res.status(ApiResponseStatus.API_SUCCESS).json({
-    //                 status: true,
-    //                 payload: newEmployee,
-    //                 message: ApiResponseMesage.API_SUCCESS
-    //             })
-    //         }
-    //     });
-
-    // }
-    // catch (error) {
-    //     RemoveFile(req.file.path);
-    //     res.status(ApiResponseStatus.API_INTERNAL_SERVER_ERROR).json({
-    //         success: false,
-    //         payload: [],
-    //         message: error?.message,
-    //     })
-    // }
-
-
     try {
         const filePath = req.file.path;
 

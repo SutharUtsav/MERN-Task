@@ -34,6 +34,7 @@ model EmployeeCustomInfo{
   id          Int      @id @default(autoincrement())
   mobileNo    String
   uanNo       String 
+  city        String
   employee    Employee @relation(fields: [employeeId], references: [id])
   employeeId  Int    @unique
   createdAt  DateTime @default(now())

@@ -19,6 +19,7 @@ const assignEmployeeFromCSVString = async (input) => {
 
     const row = [];
 
+    //Applied regex to avoid delimeter inside ""
     String(input).split(new RegExp(`,(?=(?:(?:[^"]*"){2})*[^"]*$)`)).forEach(part => {
         const trimmedPart = part.trim();
         row.push(trimmedPart);
@@ -34,6 +35,7 @@ const assignEmployeeFromCSVString = async (input) => {
         skills: row[6],         //Skills
         mobileNo: row[7],       //Mobile No
         uanNo: row[8],          //UAN No
+        city: row[9],           //city
     }
 }
 const validateEmployeeFromExcelSheet = async (row) => {
@@ -68,6 +70,9 @@ const validateEmployeeFromExcelSheet = async (row) => {
     else if (!employee.address) {
         return requiredValidationError("Address");
     }
+    else if(!employee.city){
+        return requiredValidationError("City");
+    }
 
     if(employee?.skills){
         if(String(employee.skills).charAt(0)==="\""){
@@ -88,7 +93,8 @@ const validateEmployeeFromExcelSheet = async (row) => {
             address: String(employee.address),
             customInfo: {
                 mobileNo: String(employee.mobileNo),
-                uanNo: String(employee.uanNo)
+                uanNo: String(employee.uanNo),
+                city: String(employee.city)
             }
         }
     }
@@ -139,13 +145,16 @@ const validateEmployeeCustomInfo = (customInfo) => {
     if (!customInfo) {
         return requiredValidationError("Custom Info");
     }
-
+    else if(!customInfo.city){
+        return requiredValidationError("City");
+    }
     return {
         status: true,
         message: "Validation passed",
         payload: {
             mobileNo: String(customInfo.mobileNo),
-            uanNo: String(customInfo.uanNo)
+            uanNo: String(customInfo.uanNo),
+            city: String(customInfo.city)
         }
     }
 }
