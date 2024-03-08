@@ -156,13 +156,11 @@ router.post('/upload-data', uploadExcelSheet, async (req, res) => {
         let employees = [];
         let errors = [];
 
-        // Process each row asynchronously
+        //Process each row asynchronously
         await Promise.all(
             rows.map(async (row,index) => {
                 // Split the row into columns
-                if(index!=0){
-
-                    console.log(row);
+                if(Number(index)!== 0 && Number(index)!== rows.length-1){
     
                     const columns = row.split('\t');
     
@@ -196,14 +194,19 @@ router.post('/upload-data', uploadExcelSheet, async (req, res) => {
             });
         } else {
             // Process the employees array asynchronously
-            console.log("before api call")
             const newEmployees = await Promise.all(
                 employees.map(async (employee) =>
                     prisma.employee.create({
                         data: {
-                            ...employee,
+                            name: employee.payload.name,
+                            salary: employee.payload.salary,
+                            status: employee.payload.status,
+                            joiningDate: employee.payload.joiningDate,
+                            birthDate: employee.payload.birthDate,
+                            skills: employee.payload.skills,
+                            address: employee.payload.address,
                             customInfo: {
-                                create: employee.customInfo,
+                                create: employee.payload.customInfo,
                             },
                         },
                         include: {
